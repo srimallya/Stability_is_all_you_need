@@ -2,6 +2,7 @@ import numpy as np
 import random
 import pickle
 from tokenizers import Tokenizer, models, pre_tokenizers, trainers, processors
+import matplotlib.pyplot as plt  # Add this import statement
 
 class VocabNode:
     def __init__(self, token_id, initial_state, initial_r, learning_rate):
@@ -39,7 +40,7 @@ class PyramidNetwork:
         return stability
 
 # Load and tokenize the corpus
-with open('Ontology.txt', 'r', encoding='utf-8') as file:
+with open('human_chat.txt', 'r', encoding='utf-8') as file:
     corpus = file.read()
 
 tokenizer = Tokenizer(models.BPE(unk_token="[UNK]"))
@@ -53,7 +54,7 @@ vocab_size = tokenizer.get_vocab_size()
 # Create the PyramidNetwork
 min_r = 3.86580
 max_r = 4.0
-learning_rate = 0.01
+learning_rate = 0.1
 network = PyramidNetwork(vocab_size, min_r, max_r, learning_rate)
 
 # Map related nodes and update edge weights
@@ -73,7 +74,7 @@ network.edges /= np.max(network.edges)
 print(f"Number of nodes: {vocab_size}")
 
 # Train the network
-num_epochs = 10000
+num_epochs = 250
 print(f"Training the network for {num_epochs} epochs...")
 stability_scores = []
 for epoch in range(1, num_epochs + 1):
@@ -107,7 +108,7 @@ def load_model(file_path):
     return model_data['network'], model_data['tokenizer']
 
 # Save the model after training
-model_file_path = 'pyramid_network_model.pkl'
+model_file_path = 'chat_pyramid_network_model.pkl'
 save_model(network, tokenizer, model_file_path)
 
 # Load the saved model for inference
