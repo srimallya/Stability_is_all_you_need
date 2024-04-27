@@ -86,6 +86,11 @@ updated_vocab_size = tokenizer.get_vocab_size()
 # Get the original vocabulary size
 vocab_size = len(network.nodes)
 
+# Define the hyperparameters
+min_r = 3.86580
+max_r = 4.0
+learning_rate = 0.01
+
 # Add new nodes to the network for the new tokens
 for i in range(vocab_size, updated_vocab_size):
     new_node = VocabNode(i, np.random.rand(), np.random.uniform(min_r, max_r), learning_rate)
