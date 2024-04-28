@@ -43,19 +43,26 @@ def load_model(file_path):
     return model_data['network'], model_data['tokenizer']
 
 # Inference function
-def generate_text(network, tokenizer, prompt, max_length=100):
+def generate_text(network, tokenizer, prompt, max_length=4096, context_length=4096, top_k=2):
     generated_text = prompt
-    prev_token_id = tokenizer.encode(prompt).ids[-1]
+    prompt_token_ids = tokenizer.encode(prompt).ids
+    prev_token_ids = prompt_token_ids[-context_length:]
+
     for _ in range(max_length):
-        next_token_probs = network.edges[prev_token_id]
-        # Normalize the probabilities
-        next_token_probs /= np.sum(next_token_probs)
-        next_token_id = np.random.choice(range(len(next_token_probs)), p=next_token_probs)
+        next_token_probs = network.edges[prev_token_ids[-1]]
+        # Apply top-k sampling
+        top_k_indices = np.argsort(next_token_probs)[-top_k:]
+        top_k_probs = next_token_probs[top_k_indices]
+        top_k_probs /= np.sum(top_k_probs)
+        next_token_id = np.random.choice(top_k_indices, p=top_k_probs)
+        
         generated_text += tokenizer.decode([next_token_id])
         # Add a space token after each generated word
         if tokenizer.decode([next_token_id]) != ' ':
             generated_text += ' '
-        prev_token_id = next_token_id
+        prev_token_ids.append(next_token_id)
+        prev_token_ids = prev_token_ids[-context_length:]
+
     return generated_text
 
 # Load the saved model for inference
@@ -63,6 +70,6 @@ model_file_path = 'chat_pyramid_network_model.pkl'
 loaded_network, loaded_tokenizer = load_model(model_file_path)
 
 # Example usage of the loaded model
-prompt = "who are you ? "
-generated_text = generate_text(loaded_network, loaded_tokenizer, prompt)
+prompt = "who am i ? "
+generated_text = generate_text(network, tokenizer, prompt, top_k=5)
 print("Generated text:", generated_text)
