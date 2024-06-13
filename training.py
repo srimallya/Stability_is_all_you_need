@@ -2,7 +2,7 @@ import numpy as np
 import random
 import pickle
 from tokenizers import Tokenizer, models, pre_tokenizers, trainers, processors
-import matplotlib.pyplot as plt  # Add this import statement
+import matplotlib.pyplot as plt 
 
 class VocabNode:
     def __init__(self, token_id, initial_state, initial_r, learning_rate):
